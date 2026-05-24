@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../../utility/sendResponse";
-import type { ICreateIssueBody, IIssueFilters } from "./issues.types";
-import { createIssue, getAllIssues, getIssueById, findUsersByIds } from "./issues.queries";
+import type { ICreateIssueBody, IIssueFilters, IUpdateIssueBody } from "./issues.types";
+import { createIssue, getAllIssues, getIssueById, findUsersByIds, updateIssue } from "./issues.queries";
 
 export const create = async (req: Request, res: Response) => {
     try {
@@ -101,6 +101,70 @@ export const getOne = async (req: Request, res: Response) => {
             success: true,
             message: "Issue retrieved successfully",
             data,
+        });
+    } catch (error) {
+        sendResponse({
+            res,
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Something went wrong",
+            errors: error,
+        });
+    }
+};
+
+export const update = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id as string);
+        if (isNaN(id)) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.BAD_REQUEST,
+                success: false,
+                message: "Invalid ID format provided",
+                errors: "ID must be a valid number",
+            });
+        }
+
+        const body = req.body as IUpdateIssueBody;
+        const { role, id: userId } = req.user!;
+
+        const issue = await getIssueById(id);
+        if (!issue) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.NOT_FOUND,
+                success: false,
+                message: "Issue not found",
+            });
+        }
+
+        if (role === "contributor") {
+            if (issue["reporter_id"] !== userId) {
+                return sendResponse({
+                    res,
+                    statusCode: StatusCodes.FORBIDDEN,
+                    success: false,
+                    message: "You can only update your own issues",
+                });
+            }
+            if (issue["status"] !== "open") {
+                return sendResponse({
+                    res,
+                    statusCode: StatusCodes.CONFLICT,
+                    success: false,
+                    message: "You can only update open issues",
+                });
+            }
+        }
+
+        const updated = await updateIssue(id, body);
+        sendResponse({
+            res,
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: "Issue updated successfully",
+            data: updated,
         });
     } catch (error) {
         sendResponse({

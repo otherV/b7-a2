@@ -1,5 +1,5 @@
 import pool from "../../config/db";
-import type { ICreateIssueBody, IIssueFilters } from "./issues.types";
+import type { ICreateIssueBody, IIssueFilters, IUpdateIssueBody } from "./issues.types";
 
 export const createIssue = async (data: ICreateIssueBody, reporterId: number) => {
     const result = await pool.query(
@@ -54,4 +54,18 @@ export const findUsersByIds = async (ids: number[]) => {
         [ids]
     );
     return result.rows as Record<string, unknown>[];
+};
+
+export const updateIssue = async (id: number, data: IUpdateIssueBody) => {
+    const result = await pool.query(
+        `UPDATE issues
+         SET title = COALESCE($1, title),
+             description = COALESCE($2, description),
+             type = COALESCE($3, type),
+             updated_at = NOW()
+         WHERE id = $4
+         RETURNING *`,
+        [data.title, data.description, data.type, id]
+    );
+    return result.rows[0] as Record<string, unknown>;
 };

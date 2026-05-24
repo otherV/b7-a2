@@ -20,3 +20,9 @@ export interface IIssueFilters {
     type?: "bug" | "feature_request";
     status?: "open" | "in_progress" | "resolved";
 }
+
+export interface IUpdateIssueBody {
+    title?: string;
+    description?: string;
+    type?: "bug" | "feature_request";
+}
