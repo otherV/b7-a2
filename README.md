@@ -36,8 +36,8 @@
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/otherV/devpulse-v2
-cd devpulse-v2
+git clone https://github.com/otherV/b7-a2
+cd b7-a2
 npm install
 npm run dev
 ```
