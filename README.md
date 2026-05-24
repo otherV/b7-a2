@@ -4,7 +4,7 @@
 
 > A collaborative platform for software teams to report bugs, suggest features, and coordinate resolutions.
 
-🌐 **Live URL:** [your-vercel-url-here]
+🌐 **Live URL:** [DevPulse](https://b7-a2-phi.vercel.app/)
 
 ---
 
