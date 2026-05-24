@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../../utility/sendResponse";
 import type { ICreateIssueBody, IIssueFilters, IUpdateIssueBody, IUpdateStatusBody } from "./issues.types";
 import { createIssue, getAllIssues, getIssueById, findUsersByIds, updateIssue, updateIssueStatus, deleteIssue } from "./issues.queries";
+import { parseId } from "../../utility/parseId";
 
 export const create = async (req: Request, res: Response) => {
     try {
@@ -71,8 +72,8 @@ export const getAll = async (req: Request, res: Response) => {
 
 export const getOne = async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id as string);
-        if (isNaN(id)) {
+        const id = parseId(req.params.id as string);
+        if (!id) {
             return sendResponse({
                 res,
                 statusCode: StatusCodes.BAD_REQUEST,
@@ -115,8 +116,8 @@ export const getOne = async (req: Request, res: Response) => {
 
 export const update = async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id as string);
-        if (isNaN(id)) {
+        const id = parseId(req.params.id as string);
+        if (!id) {
             return sendResponse({
                 res,
                 statusCode: StatusCodes.BAD_REQUEST,
@@ -179,9 +180,8 @@ export const update = async (req: Request, res: Response) => {
 
 export const changeStatus = async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id as string);
-
-        if (isNaN(id)) {
+        const id = parseId(req.params.id as string);
+        if (!id) {
             return sendResponse({
                 res,
                 statusCode: StatusCodes.BAD_REQUEST,
@@ -225,9 +225,8 @@ export const changeStatus = async (req: Request, res: Response) => {
 
 export const remove = async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id as string);
-
-        if (isNaN(id)) {
+        const id = parseId(req.params.id as string);
+        if (!id) {
             return sendResponse({
                 res,
                 statusCode: StatusCodes.BAD_REQUEST,
