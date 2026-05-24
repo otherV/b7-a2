@@ -40,6 +40,14 @@ export const getAllIssues = async (filters: IIssueFilters) => {
     return result.rows as Record<string, unknown>[];
 };
 
+export const getIssueById = async (id: number) => {
+    const result = await pool.query(
+        `SELECT * FROM issues WHERE id = $1`,
+        [id]
+    );
+    return result.rows[0] as Record<string, unknown> | undefined;
+};
+
 export const findUsersByIds = async (ids: number[]) => {
     const result = await pool.query(
         `SELECT id, name, role FROM users WHERE id = ANY($1)`,

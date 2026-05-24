@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../../utility/sendResponse";
 import type { ICreateIssueBody, IIssueFilters } from "./issues.types";
-import { createIssue, getAllIssues, findUsersByIds } from "./issues.queries";
+import { createIssue, getAllIssues, getIssueById, findUsersByIds } from "./issues.queries";
 
 export const create = async (req: Request, res: Response) => {
     try {
@@ -56,6 +56,50 @@ export const getAll = async (req: Request, res: Response) => {
             statusCode: StatusCodes.OK,
             success: true,
             message: "Issues retrieved successfully",
+            data,
+        });
+    } catch (error) {
+        sendResponse({
+            res,
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Something went wrong",
+            errors: error,
+        });
+    }
+};
+
+export const getOne = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id as string);
+        if (isNaN(id)) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.BAD_REQUEST,
+                success: false,
+                message: "Invalid ID format provided",
+                errors: "ID must be a valid number",
+            });
+        }
+
+        const issue = await getIssueById(id);
+        if (!issue) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.NOT_FOUND,
+                success: false,
+                message: "Issue not found",
+            });
+        }
+
+        const reporters = await findUsersByIds([issue["reporter_id"] as number]);
+        const data = { ...issue, reporter: reporters[0] ?? null };
+
+        sendResponse({
+            res,
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: "Issue retrieved successfully",
             data,
         });
     } catch (error) {
