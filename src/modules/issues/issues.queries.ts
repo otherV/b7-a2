@@ -69,3 +69,18 @@ export const updateIssue = async (id: number, data: IUpdateIssueBody) => {
     );
     return result.rows[0] as Record<string, unknown>;
 };
+
+export const updateIssueStatus = async (id: number, status: string) => {
+    const result = await pool.query(
+        `UPDATE issues
+         SET status = $1, updated_at = NOW()
+         WHERE id = $2
+         RETURNING *`,
+        [status, id]
+    );
+    return result.rows[0] as Record<string, unknown>;
+};
+
+export const deleteIssue = async (id: number) => {
+    await pool.query(`DELETE FROM issues WHERE id = $1`, [id]);
+};

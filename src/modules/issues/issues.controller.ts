@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../../utility/sendResponse";
-import type { ICreateIssueBody, IIssueFilters, IUpdateIssueBody } from "./issues.types";
-import { createIssue, getAllIssues, getIssueById, findUsersByIds, updateIssue } from "./issues.queries";
+import type { ICreateIssueBody, IIssueFilters, IUpdateIssueBody, IUpdateStatusBody } from "./issues.types";
+import { createIssue, getAllIssues, getIssueById, findUsersByIds, updateIssue, updateIssueStatus, deleteIssue } from "./issues.queries";
 
 export const create = async (req: Request, res: Response) => {
     try {
@@ -165,6 +165,94 @@ export const update = async (req: Request, res: Response) => {
             success: true,
             message: "Issue updated successfully",
             data: updated,
+        });
+    } catch (error) {
+        sendResponse({
+            res,
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Something went wrong",
+            errors: error,
+        });
+    }
+};
+
+export const changeStatus = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id as string);
+
+        if (isNaN(id)) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.BAD_REQUEST,
+                success: false,
+                message: "Invalid ID format provided",
+                errors: "ID must be a valid number",
+            });
+        }
+
+
+        const { status } = req.body as IUpdateStatusBody;
+
+        const issue = await getIssueById(id);
+        if (!issue) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.NOT_FOUND,
+                success: false,
+                message: "Issue not found",
+            });
+        }
+
+        const updated = await updateIssueStatus(id, status);
+        sendResponse({
+            res,
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: "Issue status updated successfully",
+            data: updated,
+        });
+    } catch (error) {
+        sendResponse({
+            res,
+            statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Something went wrong",
+            errors: error,
+        });
+    }
+};
+
+export const remove = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id as string);
+
+        if (isNaN(id)) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.BAD_REQUEST,
+                success: false,
+                message: "Invalid ID format provided",
+                errors: "ID must be a valid number",
+            });
+        }
+
+        const issue = await getIssueById(id);
+        if (!issue) {
+            return sendResponse({
+                res,
+                statusCode: StatusCodes.NOT_FOUND,
+                success: false,
+                message: "Issue not found",
+            });
+        }
+
+        await deleteIssue(id);
+        sendResponse({
+            res,
+            statusCode: StatusCodes.NO_CONTENT,
+            success: true,
+            message: "Issue deleted successfully",
         });
     } catch (error) {
         sendResponse({

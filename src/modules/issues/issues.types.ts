@@ -26,3 +26,7 @@ export interface IUpdateIssueBody {
     description?: string;
     type?: "bug" | "feature_request";
 }
+
+export interface IUpdateStatusBody {
+    status: "open" | "in_progress" | "resolved";
+}
